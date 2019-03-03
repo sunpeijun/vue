@@ -110,6 +110,7 @@ export function createComponent (
   const baseCtor = context.$options._base
 
   // plain options object: turn it into a constructor
+  // 继承 Vue 构建函数
   if (isObject(Ctor)) {
     Ctor = baseCtor.extend(Ctor)
   }

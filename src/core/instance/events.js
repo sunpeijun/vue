@@ -12,6 +12,7 @@ import { updateListeners } from '../vdom/helpers/index'
 export function initEvents (vm: Component) {
   vm._events = Object.create(null)
   vm._hasHookEvent = false
+  // Tips: 父子组件事件通信，将父组件事件方法绑定子组件实例上，子组件通过 emit 触发
   // init parent attached events
   const listeners = vm.$options._parentListeners
   if (listeners) {

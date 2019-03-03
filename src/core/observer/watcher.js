@@ -45,13 +45,15 @@ export default class Watcher {
     cb: Function,
     options?: Object
   ) {
-    this.vm = vm
+    this.vm = vm  // 组件实例
     vm._watchers.push(this)
     // options
     if (options) {
-      this.deep = !!options.deep
-      this.user = !!options.user
-      this.lazy = !!options.lazy
+      this.deep = !!options.deep  // 当前观察者实例对象是否是深度观测
+      this.user = !!options.user  // 当前观察者实例对象是 开发者定义的 还是 内部定义的
+      this.lazy = !!options.lazy  // 计算属性惰性求值
+      // 当数据变化时是否同步求值并执行回调
+      // 默认情况下当数据变化时不会同步求值并执行回调，而是将需要重新求值并执行回调的观察者放到一个异步队列中，当所有数据的变化结束之后统一求值并执行回调
       this.sync = !!options.sync
     } else {
       this.deep = this.user = this.lazy = this.sync = false
@@ -60,10 +62,21 @@ export default class Watcher {
     this.id = ++uid // uid for batching
     this.active = true
     this.dirty = this.lazy // for lazy watchers
+
+    // 每次重新求值的时候对于观察者实例对象来讲 newDepIds 属性始终是全新的
+    // 每次求值之后会清空 newDepIds 属性的值，但在清空之前会把 newDepIds 属性的值以及 newDeps 属性的值赋值给 depIds 属性和 deps 属性
+    // 1、newDepIds 属性用来在一次求值中避免收集重复的观察者
+    // 2、每次求值并收集观察者完成之后会清空 newDepIds 和 newDeps 这两个属性的值，并且在被清空之前把值分别赋给了 depIds 属性和 deps 属性
+    // 3、depIds 属性用来避免重复求值时收集重复的观察者
+    // 通过以上三点内容我们可以总结出一个结论，即 newDepIds 和 newDeps 这两个属性的值所存储的总是当次求值所收集到的 Dep 实例对象，
+    // 而 depIds 和 deps 这两个属性的值所存储的总是上一次求值过程中所收集到的 Dep 实例对象，用于 deps 移除废弃的观察者
     this.deps = []
     this.newDeps = []
+    // 避免在 多次求值 中收集重复依赖
     this.depIds = new Set()
+    // 避免在 一次求值 中收集重复的依赖
     this.newDepIds = new Set()
+
     this.expression = process.env.NODE_ENV !== 'production'
       ? expOrFn.toString()
       : ''
@@ -82,6 +95,7 @@ export default class Watcher {
         )
       }
     }
+    // 计算属性的观察者懒加载
     this.value = this.lazy
       ? undefined
       : this.get()
@@ -116,6 +130,10 @@ export default class Watcher {
 
   /**
    * Add a dependency to this directive.
+   * 避免收集重复依赖，无论一个数据属性被读取了多少次，对于同一个观察者它只会收集一次
+   * <div id="demo">
+   *  {{name}}{{name}}
+   * </div>
    */
   addDep (dep: Dep) {
     const id = dep.id
@@ -133,6 +151,7 @@ export default class Watcher {
    */
   cleanupDeps () {
     let i = this.deps.length
+    // deps 中移除废弃的观察者
     while (i--) {
       const dep = this.deps[i]
       if (!this.newDepIds.has(dep.id)) {

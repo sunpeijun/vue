@@ -43,6 +43,7 @@ if (process.env.NODE_ENV !== 'production') {
     })
   }
 
+  // Tips: render 函数使用 with 包含，通过 Proxy 判断是否有相应的属性或方法
   const hasHandler = {
     has (target, key) {
       const has = key in target

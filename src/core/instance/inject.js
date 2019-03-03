@@ -16,6 +16,7 @@ export function initProvide (vm: Component) {
 export function initInjections (vm: Component) {
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
+    // 关闭响应式定义的开关
     observerState.shouldConvert = false
     Object.keys(result).forEach(key => {
       /* istanbul ignore else */
@@ -51,11 +52,15 @@ export function resolveInject (inject: any, vm: Component): ?Object {
       const key = keys[i]
       const provideKey = inject[key].from
       let source = vm
+      // Tips: inject 选项的初始化是在 provide 选项初始化之前的，也就是说即使该组件通过 provide 选项提供的数据中的确存在 inject 选项注入的数据，也不会有任何影响，
+      // 因为在 inject 选项查找数据时 provide 提供的数据还没有被初始化，所以当一个组件使用 provide 提供数据时，该数据只有子代组件可用
+      // 类似于 react context 概念，子组件会递归从父组件上获取注入的数据
       while (source) {
         if (source._provided && provideKey in source._provided) {
           result[key] = source._provided[provideKey]
           break
         }
+        // 引用父组件
         source = source.$parent
       }
       if (!source) {

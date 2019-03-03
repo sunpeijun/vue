@@ -62,14 +62,17 @@ export function initState (vm: Component) {
 }
 
 function initProps (vm: Component, propsOptions: Object) {
+  // 接收父组件传递进来的数据
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
   const keys = vm.$options._propKeys = []
+  // 用来标识是否是根组件，因为根组件实例的 $parent 属性的值是不存在的
   const isRoot = !vm.$parent
   // root instance props should be converted
   observerState.shouldConvert = isRoot
+
   for (const key in propsOptions) {
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
@@ -95,12 +98,14 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
+      // 使 props 响应式
       defineReactive(props, key, value)
     }
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
     if (!(key in vm)) {
+      // 代理 props 数据至 vm
       proxy(vm, `_props`, key)
     }
   }

@@ -10,6 +10,7 @@ import { initLifecycle, callHook } from './lifecycle'
 import { initProvide, initInjections } from './inject'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
 
+// Tips: 全局实例 唯一ID
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
@@ -35,6 +36,7 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      // Tips: 序列化 options 参数
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -43,6 +45,7 @@ export function initMixin (Vue: Class<Component>) {
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
+      // Tips: 使用代理判断 render 函数是否引入未定义的变量或方法
       initProxy(vm)
     } else {
       vm._renderProxy = vm
@@ -65,6 +68,7 @@ export function initMixin (Vue: Class<Component>) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
+    // 挂载节点
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }

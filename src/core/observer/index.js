@@ -21,6 +21,8 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
  * also converted to become reactive. However when passing down props,
  * we don't want to force conversion because the value may be a nested value
  * under a frozen data structure. Converting it would defeat the optimization.
+ *
+ * 响应式数据定义的开关
  */
 export const observerState = {
   shouldConvert: true
@@ -43,6 +45,7 @@ export class Observer {
     this.vmCount = 0
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
+      // 数组需要处理重写 push、pop 方法
       const augment = hasProto
         ? protoAugment
         : copyAugment
